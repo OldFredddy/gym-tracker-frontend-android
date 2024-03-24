@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.oldfr.gym_tracker.databinding.ActivityMainBinding;
 import com.oldfr.gym_tracker.entities.Exercise;
 import com.oldfr.gym_tracker.entities.TrainingDay;
+import com.oldfr.gym_tracker.servises.HttpService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +23,8 @@ public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
-
+    private final String url = "http://"+HttpService.IP+":"+HttpService.PORT+"/get_days/";
+    private final String userId = "0";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,42 +54,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupDynamicMenu(NavigationView navigationView, NavController navController) {
-        // Имитация получения данных с сервера
-        List<TrainingDay> trainingDays = getMockedTrainingDays();
-
+        List<TrainingDay> trainingDays = HttpService.getTrainingDays(url+userId);
         Menu menu = navigationView.getMenu();
-        menu.clear(); // Очистка существующих элементов меню
+        menu.clear();
 
         for (int i = 0; i < trainingDays.size(); i++) {
-            final int dayIndex = i + 1;  // Создаем финальную переменную для использования в лямбда-выражении
+            final int dayIndex = i + 1;
             TrainingDay day = trainingDays.get(i);
-            String dayTitle = "Day " + dayIndex + " - " + getExercisesSummary(day.getExercises());
-
+            String dayTitle = "День " + dayIndex + " - " + day.getTitle();
             menu.add(Menu.NONE, Menu.NONE, i, dayTitle)
                     .setIcon(R.drawable.day1_icon)
                     .setOnMenuItemClickListener(item -> {
                         Bundle bundle = new Bundle();
-                        bundle.putInt("DayNumber", dayIndex);  // Передайте номер дня напрямую
+                        bundle.putString("UserId", userId);
+                        bundle.putParcelable("DayExercises", day);
                         navController.navigate(R.id.trainingDayFragment, bundle);
                         return true;
                     });
 
         }
     }
-    private List<TrainingDay> getMockedTrainingDays() {
-        List<TrainingDay> days = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
-            TrainingDay day = new TrainingDay();
-            day.addExercise(new Exercise("Exercise " + i, 3, 10));
-            days.add(day);
-        }
-        return days;
-    }
 
-    private String getExercisesSummary(List<Exercise> exercises) {
-        // Это пример, на практике вы можете хотеть более детально описать упражнения
-        return exercises.size() + " exercises";
-    }
     @Override
     public boolean onSupportNavigateUp() {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
