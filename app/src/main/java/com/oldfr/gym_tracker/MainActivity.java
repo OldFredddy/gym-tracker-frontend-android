@@ -23,41 +23,31 @@ public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
-    private final String url = "http://"+HttpService.IP+":"+HttpService.PORT+"/get_days/";
     private final String userId = "0";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
         setSupportActionBar(binding.appBarMain.toolbar);
         binding.appBarMain.fab.setOnClickListener(view -> Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show());
-
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
-
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-
-        // Инициализация AppBarConfiguration с использованием navController
         mAppBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph())
                 .setOpenableLayout(drawer)
                 .build();
-
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
-
-        // Здесь может быть логика для динамического создания и добавления элементов меню
         setupDynamicMenu(navigationView, navController);
     }
 
     private void setupDynamicMenu(NavigationView navigationView, NavController navController) {
-        List<TrainingDay> trainingDays = HttpService.getTrainingDays(url+userId);
+        String url = "http://" + HttpService.IP + ":" + HttpService.PORT + "/get_days/";
+        List<TrainingDay> trainingDays = HttpService.getTrainingDays(url +userId);
         Menu menu = navigationView.getMenu();
         menu.clear();
-
         for (int i = 0; i < trainingDays.size(); i++) {
             final int dayIndex = i + 1;
             TrainingDay day = trainingDays.get(i);
@@ -71,7 +61,6 @@ public class MainActivity extends AppCompatActivity {
                         navController.navigate(R.id.trainingDayFragment, bundle);
                         return true;
                     });
-
         }
     }
 
